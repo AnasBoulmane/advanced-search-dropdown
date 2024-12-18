@@ -4,8 +4,13 @@ export class VirtualScroller {
 		this.itemHeight = options.itemHeight || 40;
 		this.containerHeight = options.containerHeight || 400;
 		this.bufferSize = options.bufferSize || 5;
+		this.itemGap = options.itemGap || 0;
 		this.totalItems = 0;
 		this.scrollTop = 0;
+	}
+
+	get itemVirtualHeight() {
+		return this.itemHeight + this.itemGap;
 	}
 
 	updateConfig({ scrollTop, totalItems } = {}) {
@@ -14,8 +19,8 @@ export class VirtualScroller {
 	}
 
 	getVisibleRange() {
-		const visibleCount = Math.ceil(this.containerHeight / this.itemHeight);
-		const startIndex = Math.floor(this.scrollTop / this.itemHeight);
+		const visibleCount = Math.ceil(this.containerHeight / this.itemVirtualHeight);
+		const startIndex = Math.floor(this.scrollTop / this.itemVirtualHeight);
 		const start = Math.max(0, startIndex - this.bufferSize);
 		const end = Math.min(this.totalItems, startIndex + visibleCount + this.bufferSize);
 
@@ -29,13 +34,13 @@ export class VirtualScroller {
 	}
 
 	getScrollHeight() {
-		return this.totalItems * this.itemHeight;
+		return this.totalItems * this.itemVirtualHeight;
 	}
 
 	getItemStyle(index) {
 		return {
 			position: 'absolute',
-			top: `${index * this.itemHeight}px`,
+			top: `${index * this.itemVirtualHeight}px`,
 			height: `${this.itemHeight}px`,
 			left: 0,
 			right: 0,

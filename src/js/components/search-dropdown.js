@@ -22,6 +22,7 @@ export class SearchDropdown {
 			placeholder: 'Search...',
 			pageSize: 10,
 			debounceTime: 300,
+			minSearchLength: 3,
 			...config,
 		};
 
@@ -36,7 +37,8 @@ export class SearchDropdown {
 
 		this.#virtualScroller = new VirtualScroller({
 			itemHeight: this.#options.itemHeight || 36,
-			containerHeight: this.#options.containerHeight,
+			itemGap: this.#options.itemGap || 4,
+			containerHeight: this.#options.containerHeight || 300,
 			bufferSize: 10,
 		});
 
@@ -165,7 +167,7 @@ export class SearchDropdown {
 		try {
 			const searchTerm = this.#elements.input.value.trim();
 			// Reset search state and close dropdown if search term is less than 3 characters
-			if (searchTerm.length < 3) {
+			if (searchTerm.length < this.#options.minSearchLength) {
 				this.#state.items = [];
 				this.#setOpen(false);
 				// Reset scroll position on new search
@@ -259,7 +261,7 @@ export class SearchDropdown {
 				return `
           <div
             style="${styleString}"
-            class="group absolute w-full !h-auto flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer hover:bg-slate-700 data-[selected]:bg-slate-700"
+            class="group absolute w-full flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer hover:bg-slate-700 data-[selected]:bg-slate-700"
             data-item-id="${item.id}"
             ${this.#state.selectedItems.has(item.id) ? 'data-selected="true"' : ''}
           >
