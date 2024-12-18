@@ -5,7 +5,7 @@ import { SearchDropdown } from './components/search-dropdown.js';
 const dropdown = new SearchDropdown({
 	fetchData: fetchSuggestions,
 	placeholder: 'Search items...',
-	pageSize: 10,
+	pageSize: 10000,
 });
 
 // Mount dropdown
