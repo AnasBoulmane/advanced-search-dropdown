@@ -77,8 +77,8 @@ export class SearchDropdown {
 		this.#elements.suggestions.className = 'h-60 overflow-y-auto';
 
 		// Selected items count
-		this.#elements.selectedCount = document.createElement('div');
-		this.#elements.selectedCount.className = 'absolute right-2 top-0 h-full flex items-center gap-1';
+		this.#elements.selectedContainer = document.createElement('div');
+		this.#elements.selectedContainer.className = 'absolute right-2 top-0 h-full flex items-center gap-1';
 
 		// Create virtual scroll viewport
 		this.#elements.viewport = document.createElement('div');
@@ -88,13 +88,18 @@ export class SearchDropdown {
 		this.#elements.content = document.createElement('div');
 		this.#elements.content.className = 'absolute w-full';
 
+		this.#elements.preview = document.createElement('div');
+		this.#elements.preview.className =
+			'fixed hidden z-[100] bg-slate-800 p-2 rounded-lg shadow-xl border border-slate-600 pointer-events-none';
+		document.body.appendChild(this.#elements.preview);
+
 		this.#elements.viewport.appendChild(this.#elements.content);
 		this.#elements.suggestions.appendChild(this.#elements.viewport);
 
 		// Assemble the elements
 		this.#elements.inputWrapper.appendChild(this.#elements.input);
 		this.#elements.inputWrapper.appendChild(searchIcon);
-		this.#elements.inputWrapper.appendChild(this.#elements.selectedCount);
+		this.#elements.inputWrapper.appendChild(this.#elements.selectedContainer);
 		this.#elements.dropdown.appendChild(this.#elements.suggestions);
 		this.#elements.container.appendChild(this.#elements.inputWrapper);
 		this.#elements.container.appendChild(this.#elements.dropdown);
@@ -126,36 +131,75 @@ export class SearchDropdown {
 			this.#handleScroll();
 		});
 
-		// Handle item selection
-		// Single handler for all item clicks using event delegation
-		const handleItemClick = (itemId) => {
-			if (this.#state.selectedItems.has(itemId)) {
-				this.#state.selectedItems.delete(itemId);
-			} else {
-				const item = this.#state.items.find((i) => i.id === itemId);
-				this.#state.selectedItems.set(itemId, item);
-			}
+		// Add hover events using event delegation
+		this.#eventSink.handleItemHover = bindEventListener(
+			this.#elements.content,
+			'mousemove',
+			this.#handleItemHover.bind(this)
+		);
 
-			this.#emit('select', Array.from(this.#state.selectedItems.values()));
-			this.#renderSelectedPreview();
-			this.#renderVisibleItems();
-		};
+		this.#eventSink.handleItemLeave = bindEventListener(this.#elements.content, 'mouseleave', () => {
+			this.#elements.preview.classList.add('hidden');
+		});
+
+		// Handle item selection
 
 		// Use event delegation for both containers
 		const handlers = [
-			bindEventListener(this.#elements.content, 'click', (e) => {
-				const itemElement = e.target.closest('[data-item-id]');
-				if (!itemElement) return;
-				handleItemClick(itemElement.dataset.itemId);
-			}),
-			bindEventListener(this.#elements.selectedCount, 'click', (e) => {
-				const itemElement = e.target.closest('[data-item-id]');
-				if (!itemElement) return;
-				handleItemClick(itemElement.dataset.itemId);
-			}),
+			bindEventListener(this.#elements.content, 'click', this.#handleItemClick.bind(this)),
+			bindEventListener(this.#elements.selectedContainer, 'click', this.#handleItemClick.bind(this)),
 		];
 
 		this.#eventSink.itemsEventSink = () => handlers.forEach((unbind) => unbind());
+	}
+
+	#handleItemHover(e) {
+		const itemElement = e.target.closest('[data-item-id]');
+		if (!itemElement) return;
+
+		const itemId = itemElement.dataset.itemId;
+		const item = this.#state.items.find((i) => i.id === itemId);
+
+		if (!item?.images?.preview) return;
+
+		// Get element position
+		const rect = itemElement.getBoundingClientRect();
+
+		// Position preview next to the item
+		this.#elements.preview.style.left = `${rect.right + 8}px`;
+		this.#elements.preview.style.top = `${rect.top}px`;
+
+		// Show preview with loading state
+		this.#elements.preview.classList.remove('hidden');
+
+		// Load image
+		const img = new Image();
+		img.className = 'w-48 h-48 object-cover rounded';
+		img.src = item.images.preview;
+
+		img.onload = () => {
+			if (!this.#elements.preview.classList.contains('hidden')) {
+				this.#elements.preview.innerHTML = '';
+				this.#elements.preview.appendChild(img);
+			}
+		};
+	}
+
+	#handleItemClick(e) {
+		const itemElement = e.target.closest('[data-item-id]');
+		if (!itemElement) return;
+		const itemId = itemElement.dataset.itemId;
+
+		if (this.#state.selectedItems.has(itemId)) {
+			this.#state.selectedItems.delete(itemId);
+		} else {
+			const item = this.#state.items.find((i) => i.id === itemId);
+			this.#state.selectedItems.set(itemId, item);
+		}
+
+		this.#emit('select', Array.from(this.#state.selectedItems.values()));
+		this.#renderSelectedPreview();
+		this.#renderVisibleItems();
 	}
 
 	#setOpen(isOpen) {
@@ -234,6 +278,7 @@ export class SearchDropdown {
 		// Schedule render
 		if (this.#renderTimeout) {
 			cancelAnimationFrame(this.#renderTimeout);
+			this.#renderTimeout = null;
 		}
 
 		this.#renderTimeout = requestAnimationFrame(() => {
@@ -306,7 +351,7 @@ export class SearchDropdown {
 		const selectedItems = Array.from(this.#state.selectedItems.values());
 		// only show 2 selected items in preview at all time
 		const selectedPreview = selectedItems.length > 2 ? selectedItems.slice(0, 1) : selectedItems.slice(0, 2);
-		this.#elements.selectedCount.innerHTML =
+		this.#elements.selectedContainer.innerHTML =
 			this.#state.selectedItems.size > 0
 				? `
 				${selectedPreview
