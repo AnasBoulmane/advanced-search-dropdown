@@ -1,16 +1,27 @@
 {
-  "name": "search-dropdown",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "vite": "^6.0.3"
-  }
+	"name": "search-dropdown",
+	"version": "1.0.0",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"lint": "eslint src/**/*.js",
+		"lint:fix": "eslint src/**/*.js --fix",
+		"format": "prettier --write src/**/*.{js,html,css}"
+	},
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"devDependencies": {
+		"@eslint/js": "^9.17.0",
+		"eslint": "^9.17.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^5.2.1",
+		"globals": "^15.13.0",
+		"prettier": "^3.4.2",
+		"vite": "^6.0.3"
+	}
 }
