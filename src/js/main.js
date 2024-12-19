@@ -1,11 +1,13 @@
 import { fetchSuggestions } from './api/suggestions.js';
+import { LocalStorageHistoryManager } from './utils/history-manager.js';
 import { SearchDropdown } from './components/search-dropdown.js';
 
 // Initialize dropdown with mock data
 const dropdown = new SearchDropdown({
 	fetchData: fetchSuggestions,
+	historyManager: new LocalStorageHistoryManager(),
 	placeholder: 'Search items...',
-	pageSize: 10000,
+	pageSize: 10,
 });
 
 // Mount dropdown

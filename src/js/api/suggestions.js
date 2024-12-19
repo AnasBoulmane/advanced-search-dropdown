@@ -8,9 +8,9 @@ function generateMockItems(searchTerm, page, pageSize) {
 			id: `${normalizedTerm}-${page * pageSize + i}`,
 			label: `${searchTerm || 'Item'} ${page * pageSize + i + 1}`,
 			images: {
-				icon: `https://via.placeholder.com/50?text=${searchTerm || 'Item'} ${page * pageSize + i + 1}`,
-				preview: `https://via.placeholder.com/400?text=${searchTerm || 'Item'} ${page * pageSize + i + 1}`,
-				thumbnail: `https://via.placeholder.com/150?text=${searchTerm || 'Item'} ${page * pageSize + i + 1}`,
+				icon: `https://via.placeholder.com/50?text=${searchTerm || 'Item'}_${page * pageSize + i + 1}`,
+				preview: `https://via.placeholder.com/250?text=${searchTerm || 'Item'}_${page * pageSize + i + 1}`,
+				thumbnail: `https://via.placeholder.com/150?text=${searchTerm || 'Item'}_${page * pageSize + i + 1}`,
 			},
 		}));
 }
