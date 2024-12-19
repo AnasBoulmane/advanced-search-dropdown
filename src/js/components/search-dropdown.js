@@ -66,12 +66,21 @@ export class SearchDropdown {
 		// Load history data
 		this.#loadHistoryData();
 		// Subscribe to state changes to update the view
-		this.#stateManager.subscribe((state) => {
-			const timestamp = new Date().toISOString();
-			console.log('rendering state:', timestamp, state);
-			this.#viewManager.renderDropdownContent(state);
-			this.#viewManager.renderSelectedPreview(Array.from(state.selectedItems.values()));
-		});
+		this.#stateManager.subscribe(
+			(state) => this.#viewManager.renderRecentHistory(state),
+			['isHistoryVisible', 'recentItems', 'historyItems']
+		);
+		this.#stateManager.subscribe(
+			(state) => {
+				if (state.isHistoryVisible) return;
+				this.#viewManager.renderSuggestions(state);
+			},
+			['items', 'selectedItems', 'loading', 'error', 'isHistoryVisible']
+		);
+		this.#stateManager.subscribe(
+			(state) => this.#viewManager.renderSelectedPreview(Array.from(state.selectedItems.values())),
+			['selectedItems']
+		);
 	}
 
 	#setupEvents() {
@@ -159,12 +168,12 @@ export class SearchDropdown {
 		const searchTerm = elements.input.value.trim();
 
 		// Reset search if term is too short
-		if (searchTerm.length < this.#options.minSearchLength && !state.recentItems?.length) {
+		if (searchTerm.length < this.#options.minSearchLength) {
 			this.#stateManager.setState({
 				items: [],
 				page: 0,
 			});
-			this.#setOpen(false);
+			this.#setOpen(!!state.recentItems?.length);
 			elements.viewport.scrollTop = 0;
 			this.#virtualScroller.updateConfig({ scrollTop: 0 });
 			return;

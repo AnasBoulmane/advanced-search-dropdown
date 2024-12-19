@@ -44,11 +44,11 @@ export class SearchDropdownViewManager {
 		return elements;
 	}
 
-	renderDropdownContent(state) {
+	renderRecentHistory(state) {
 		const { recentItems, historyItems, isHistoryVisible } = state;
 
 		// Render recent section if we have items
-		if (recentItems?.length > 0) {
+		if (!isHistoryVisible && recentItems?.length > 0) {
 			this.#elements.recentSection.innerHTML = this.#templates.recentSection(recentItems);
 		} else {
 			this.#elements.recentSection.innerHTML = '';
@@ -56,21 +56,15 @@ export class SearchDropdownViewManager {
 
 		// Render history section if visible
 		if (isHistoryVisible) {
-			console.log('Rendering history section:');
-			this.#elements.recentSection.innerHTML = '';
 			const historySection = createElement(this.#templates.historySection(historyItems));
 			this.#elements.recentSection.appendChild(historySection);
-			this.#elements.suggestions.style.display = 'none';
-			return; // Don't show suggestions when history is visible
+			this.#elements.suggestions.style.display = 'none'; // Don't show suggestions when history is visible
 		}
-
-		// Render suggestions section
-		this.#elements.suggestions.style.display = state.items.length > 0 ? 'block' : 'none';
-		this.#virtualScroller.updateConfig({ totalItems: state.items.length });
-		this.renderVisibleItems(state);
 	}
 
-	renderVisibleItems(state) {
+	renderSuggestions(state) {
+		this.#elements.suggestions.style.display = state.items.length > 0 || state.loading ? 'block' : 'none';
+		this.#virtualScroller.updateConfig({ totalItems: state.items.length });
 		const { start, end } = this.#virtualScroller.getVisibleRange();
 		const visibleItems = state.items.slice(start, end);
 

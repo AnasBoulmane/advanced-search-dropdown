@@ -39,7 +39,7 @@ export class SearchDropdownTemplates {
 				role="listbox"
 			>
 				<div class="recent-items-container"></div>
-				<div class="suggestions-container relative h-60 overflow-hidden">
+				<div class="suggestions-container relative h-60 overflow-hidden hidden">
 					<div class="viewport absolute inset-1 overflow-auto rounded">
 						<div class="items-container absolute w-full"></div>
 					</div>
@@ -116,11 +116,11 @@ export class SearchDropdownTemplates {
 	static recentItem(item) {
 		return `
       <div
-        class="flex items-center gap-2 px-3 py-1.5 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600"
+        class="flex flex-col items-center gap-2 w-1/5 px-3 py-1.5 rounded-lg cursor-pointer hover:bg-slate-600"
         data-item-id="${item.id}"
         data-recent-item
       >
-        <img src="${item.images?.icon}" class="w-4 h-4" alt="">
+        <img src="${item.images?.icon}" class="w-7 h-7" alt="">
         <span class="text-sm text-white whitespace-nowrap">${item.label}</span>
       </div>
     `;
@@ -141,7 +141,7 @@ export class SearchDropdownTemplates {
 				${
 					items.length > 0
 						? `
-						<div class="space-y-1">
+						<div class="space-y-1 h-60 overflow-auto">
 							${items.map((item) => this.historyItem(item)).join('')}
 						</div>
 					`
@@ -158,7 +158,7 @@ export class SearchDropdownTemplates {
         data-item-id="${item.id}"
         data-history-item
       >
-        <img src="${item.images?.icon}" class="w-5 h-5" alt="">
+        <img src="${item.images?.icon}" class="w-5 h-5 rounded border-slate-500" alt="">
         <span class="text-sm text-white">${item.label}</span>
         <span class="ml-auto text-xs text-slate-400">
           ${formatTimestamp(item.timestamp)}
